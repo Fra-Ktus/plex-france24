@@ -1,0 +1,68 @@
+import urllib
+import re
+import string
+####################################################################################################
+
+def MetadataObjectForURL(url):
+  try:
+    html = HTML.ElementFromURL(url)
+  except:
+    raise Ex.MediaNotAvailable
+  title = html.xpath('//meta[@property="og:title"]/@content')[0]
+  thumb = html.xpath('//meta[@property="og:image"]/@content')[0]
+  summary = html.xpath('//meta[@property="og:description"]/@content')[0]
+  return VideoClipObject ( title = title, summary = summary, thumb = thumb )
+
+####################################################################################################
+
+def MediaObjectsForURL(url):
+  Log ("France24 MediaObjectsForURL " + url )
+  return [MediaObject(container = Container.MP4, video_codec = VideoCodec.H264, audio_codec = AudioCodec.AAC,video_resolution = "sd",
+      optimized_for_streaming = True,
+      audio_channels = 2,                                                  
+      parts = [PartObject(key=Callback(PlayVideo, url = url))]
+    )
+  ]
+
+####################################################################################################
+
+def GetJSON (html, video_id):
+  xpath_request = ".//div[@data-bo-nid=\""+video_id+"\"]/script"
+  Log ("France24 xpath_request " + xpath_request )
+  config = html.xpath(xpath_request)[0].text
+  return (str(config))
+
+####################################################################################################
+
+def GetJSON_2 (html, video_id):
+  scripts = html.xpath('.//script[@type="text/javascript"]/text()')
+  for script in scripts:
+    Log ("France24 GetJSON_2 script")
+    Log (script)
+    if script.find(video_id) > 0 and script.find('"source"') > 0:
+      return (str(script))
+  raise Ex.MediaNotAvailable
+  return
+
+####################################################################################################
+
+def PlayVideo(url):
+  Log ("France24 PlayVideo " + url )
+  # we may pass direct mp4 links, so test that here and directly return...
+  if url.endswith("mp4") == True:
+    return Redirect(video_url)
+  else:
+    html = HTML.ElementFromURL(url)
+    # get javascript vars to fetch the id of the video
+    config_vars = html.xpath('.//script[contains(@class, "tc-config-vars")]')[0].text
+    config_vars_json = str(config_vars)
+    # Log ("France24 config_vars_json " + config_vars_json )
+    video_id = config_vars_json.split("aef_id_contenu\"] = \'")[1].split("\';")[0]
+    Log ("France24 video_id " + video_id )
+    # use the video id to get the right javascript
+    config_json= GetJSON_2 (html = html, video_id = video_id)
+    video_url = config_json.split("\"source\"")[1].split("\"")[1]
+    video_url = video_url.replace ("\\","")
+    Log ("France24 url " + video_url )
+    return Redirect(video_url)
+  

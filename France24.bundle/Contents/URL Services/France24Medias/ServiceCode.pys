@@ -1,0 +1,30 @@
+import urllib
+import re
+####################################################################################################
+
+def MetadataObjectForURL(url):
+  Log ("France24Medias MetadataObjectForURL " + url )
+  if (url.endswith('jt.mp4')) == True:
+    return VideoClipObject ( title = 'News', summary = 'News' )
+  if (url.endswith('meteo.mp4')) == True:
+    return VideoClipObject ( title = 'Meteo', summary = 'Meteo' )
+  if (url.endswith('eco.mp4')) == True:
+    return VideoClipObject ( title = 'Economy', summary = 'Economy' )
+  return VideoClipObject ( title = 'Unknown', summary = 'Unknown' )
+
+####################################################################################################
+
+def MediaObjectsForURL(url):
+  Log ("France24Medias MediaObjectsForURL " + url )
+  return [MediaObject(container = Container.MP4, video_codec = VideoCodec.H264, audio_codec = AudioCodec.AAC,video_resolution = "sd",
+      optimized_for_streaming = True,
+      audio_channels = 2,                                                  
+      parts = [PartObject(key=Callback(PlayVideo, url = url))]
+    )
+  ]                                                                      
+
+def PlayVideo(url):
+  Log ("France24Medias PlayVideo " + url )
+  # we are supposed to pass direct mp4 links, so return directly...
+  return Redirect(url)
+  
