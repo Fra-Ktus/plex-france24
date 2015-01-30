@@ -36,10 +36,11 @@ def GetJSON (html, video_id):
 
 def GetJSON_2 (html, video_id):
   scripts = html.xpath('.//script[@type="text/javascript"]/text()')
+  video_id_str = video_id.decode("unicode_escape")
   for script in scripts:
-    Log ("France24 GetJSON_2 script")
-    Log (script)
-    if script.find(video_id) > 0 and script.find('"source"') > 0:
+    # Log ("France24 GetJSON_2 script id " + video_id_str)
+    # Log (script)
+    if script.find(video_id_str) > 0 and script.find('"source"') > 0:
       return (str(script))
   raise Ex.MediaNotAvailable
   return
@@ -57,7 +58,7 @@ def PlayVideo(url):
     config_vars = html.xpath('.//script[contains(@class, "tc-config-vars")]')[0].text
     config_vars_json = str(config_vars)
     # Log ("France24 config_vars_json " + config_vars_json )
-    video_id = config_vars_json.split("aef_id_contenu\"] = \'")[1].split("\';")[0]
+    video_id = config_vars_json.split("aef_id_contenu\"] = \"")[1].split("\";")[0]
     Log ("France24 video_id " + video_id )
     # use the video id to get the right javascript
     config_json= GetJSON_2 (html = html, video_id = video_id)
