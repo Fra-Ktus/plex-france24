@@ -35,7 +35,8 @@ def GetJSON (html, video_id):
 ####################################################################################################
 
 def GetJSON_2 (html, video_id):
-  scripts = html.xpath('.//script[@type="text/javascript"]/text()')
+  # scripts = html.xpath('.//script[@type="text/javascript"]/text()')
+  scripts = html.xpath('.//script[@type="application/ld+json"]/text()')
   video_id_str = video_id.decode("unicode_escape")
   for script in scripts:
     # Log ("France24 GetJSON_2 script id " + video_id_str)
